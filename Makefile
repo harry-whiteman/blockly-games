@@ -59,15 +59,34 @@ deps:
 	mkdir -p appengine/third-party
 	wget -N https://unpkg.com/@babel/standalone@7.14.8/babel.min.js
 	mv babel.min.js appengine/third-party/
-	@# GitHub doesn't support git archive, so download files using svn.
-	svn export --force https://github.com/ajaxorg/ace-builds/trunk/src-min-noconflict/ appengine/third-party/ace
+	
+	# Download ACE editor files directly
+	mkdir -p appengine/third-party/ace
+	wget -N https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/ace.js -O appengine/third-party/ace/ace.js
+	wget -N https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/mode-javascript.js -O appengine/third-party/ace/mode-javascript.js
+	wget -N https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/theme-chrome.js -O appengine/third-party/ace/theme-chrome.js
+	wget -N https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.12/worker-javascript.js -O appengine/third-party/ace/worker-javascript.js
+
+	# Clone Blockly repository
 	mkdir -p appengine/third-party/blockly
-	svn export --force https://github.com/NeilFraser/blockly-for-BG/trunk/ appengine/third-party/blockly
-	svn export --force https://github.com/CreateJS/SoundJS/trunk/lib/ appengine/third-party/SoundJS
+	git clone --depth 1 https://github.com/NeilFraser/blockly-for-BG.git appengine/third-party/blockly_temp
+	cp -r appengine/third-party/blockly_temp/* appengine/third-party/blockly/
+	rm -rf appengine/third-party/blockly_temp
+
+	# Download SoundJS
+	mkdir -p appengine/third-party/SoundJS
+	wget -N https://code.createjs.com/1.0.0/soundjs.min.js -O appengine/third-party/SoundJS/soundjs.min.js
+
 	cp third-party/base.js appengine/third-party/
 	cp -R third-party/soundfonts appengine/third-party/
 
-	svn export --force https://github.com/NeilFraser/JS-Interpreter/trunk/ appengine/third-party/JS-Interpreter
+	# Clone and build JS-Interpreter
+	mkdir -p appengine/third-party/JS-Interpreter
+	git clone --depth 1 https://github.com/NeilFraser/JS-Interpreter.git appengine/third-party/JS-Interpreter_temp
+	cp appengine/third-party/JS-Interpreter_temp/acorn.js appengine/third-party/JS-Interpreter/
+	cp appengine/third-party/JS-Interpreter_temp/interpreter.js appengine/third-party/JS-Interpreter/
+	rm -rf appengine/third-party/JS-Interpreter_temp
+
 	@# Compile JS-Interpreter using SIMPLE_OPTIMIZATIONS because the Music game needs to mess with the stack.
 	java -jar build/third-party-downloads/closure-compiler.jar\
 	  --language_out ECMASCRIPT5\
